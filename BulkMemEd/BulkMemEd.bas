@@ -10,6 +10,9 @@
 1 rem  http://www.lemon64.com/forum/viewtopic.php?t=8636
 1 rem - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+1 rem Notes:
+1 rem  * You can't enter more than 2 rows at the same time. (76 chars)
+
 1 rem Values:
 1 rem  a  - Current address in decimal for poke command
 1 rem  c$ - User input
@@ -19,20 +22,16 @@
 
 10 a=24576: rem $6000 (safe ram area)
 
-30 print ""
-31 print "you can only enter 76 characters"
-32 print " => 2 rows - 1 char"
-
 50 print ""
 60 print "current address:"str$(a)
 70 c$=""
 80 input ""; c$
 
-100 if c$="" goto 300; rem goto end
+100 if c$="" then end
 110 e$=left$(c$,1)
-120 if e$="+" goto 150; rem next(right pointing angle)
-125 if e$="-" goto 153; rem previous(left  pointing angle)
-130 if e$="j" goto 160; rem jump somewhere
+120 if e$="+" then a=a+1: goto 50;
+125 if e$="-" then a=a-1: goto 50;
+130 if e$="j" goto 150;
 135 rem if e$="p" goto 9999; rem peek
 
 140 if len(c$)/2 <> int(len(c$)/2) goto 290;
@@ -40,34 +39,28 @@
 142 h$="00"+left$(c$,2)
 143 c$=right$(c$,len(c$)-2)
 144 gosub 200
+145 rem These 2 lines seem to cause problems on a real c64 with fc3.
+145 rem Or i'm just bad at typing, idk.
 145 rem print "#"a" = #$"right$(h$,2)" =>"d
-145 print "#"right$(str$(a),len(str$(a))-1)" = #$"right$(h$,2)" =>"d
+145 print "#"right$(str$(a),len(str$(a))-1)" = #$"right$(h$,2)" <=>"d
 146 poke a,d
 147 a=a+1
 148 next x
 149 goto 50
 
-150 a=a+1
-151 goto 50
-
-153 a=a-1
+150 if len(c$)<>5 goto 291;
+151 h$ = right$(c$, len(c$)-1)
+152 gosub 200
+153 a=d
 154 goto 50
 
-160 if len(c$)<>5 goto 291;
-161 h$ = right$(c$, len(c$)-1)
-162 gosub 200
-163 a=d
-164 goto 50
-
 200 d=0
-210 for i=0 to 3
-220 n=asc(mid$(h$,i+1,1))-48
-230 if n<10 then d=d+n*(16^(3-i))
-240 if n>16 then d=d+(n-7)*(16^(3-i))
-250 next i
-260 return
+201 for i=0 to 3
+202 n=asc(mid$(h$,i+1,1))-48
+203 if n<10 then d=d+n*(16^(3-i))
+204 if n>16 then d=d+(n-7)*(16^(3-i))
+205 next i
+206 return
 
-290 print "error: you entered an odd number, not an even one": goto 50
-291 print "error: the command wasn't 5 characters long.": goto 50
-
-300 end
+290 print "error: please enter an even number": goto 50
+291 print "error: command not 5 characters long.": goto 50
